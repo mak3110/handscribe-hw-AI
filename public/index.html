@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HandScribe AI - Student Handwriting Analyzer & Synthesizer</title>
+  <meta name="description" content="An interactive student dashboard to analyze, refine, and generate text in personalized handwriting styles across multiple subjects.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Style Link -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          <span class="logo-text">HandScribe<span>AI</span></span>
+        </div>
+        <p class="logo-subtitle">Adaptive Penmanship Lab</p>
+      </div>
+
+      <nav class="sidebar-menu">
+        <button class="nav-btn active" data-target="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-target="analyzer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Camera & Upload</span>
+        </button>
+        <button class="nav-btn" data-target="generator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Practice & Synthesis</span>
+        </button>
+        <button class="nav-btn" data-target="chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>AI Coach Chat</span>
+          <span class="badge" id="chat-count">0</span>
+        </button>
+        <button class="nav-btn" data-target="history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>History & Trends</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="profile-card">
+          <div class="avatar" id="sidebar-avatar">G</div>
+          <div class="info">
+            <p class="name" id="sidebar-name">Guest Student</p>
+            <p class="status">Profile: <span id="profile-status-name">Refining</span></p>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-block" id="btn-logout" style="margin-top: 8px; font-size: 11px; padding: 6px; display: none;">Log Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="header-title">
+          <h1 id="page-title">Dashboard Overview</h1>
+          <p id="page-subtitle" class="text-muted">Monitor learning progression and handwriting statistics.</p>
+        </div>
+        <div class="header-actions">
+          <div class="badge-status">
+            <span class="status-indicator online"></span>
+            <span>Local Backend Sync Active</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Panels -->
+      <div class="content-body">
+        
+        <!-- PANEL 1: DASHBOARD -->
+        <section id="panel-dashboard" class="content-panel active">
+          <!-- Overview Cards Grid -->
+          <div class="grid-overview">
+            <!-- Active Handwriting Profile -->
+            <div class="card card-profile">
+              <div class="card-header">
+                <h3>Active Handwriting Signature</h3>
+                <span class="tag">Refined Profile</span>
+              </div>
+              <div class="card-body">
+                <div class="metrics-grid">
+                  <div class="metric">
+                    <span class="label">Average Slant</span>
+                    <span class="value" id="dash-slant">--</span>
+                  </div>
+                  <div class="metric">
+                    <span class="label">Stroke Width</span>
+                    <span class="value" id="dash-width">--</span>
+                  </div>
+                  <div class="metric">
+                    <span class="label">Consistency</span>
+                    <span class="value" id="dash-consistency">--</span>
+                  </div>
+                  <div class="metric">
+                    <span class="label">Cursive Ratio</span>
+                    <span class="value" id="dash-cursive">--</span>
+                  </div>
+                </div>
+                <div class="profile-details-list">
+                  <div class="detail-item">
+                    <span>Calibration Cycles</span>
+                    <strong id="dash-sessions">0 uploads</strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Base Spacing</span>
+                    <strong id="dash-spacing">--</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Learning Progression -->
+            <div class="card card-progression">
+              <div class="card-header">
+                <h3>Learning Progression Model</h3>
+                <span class="tag-accent">AI System Status</span>
+              </div>
+              <div class="card-body progress-container">
+                <div class="progress-info">
+                  <div class="circular-progress">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                      <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      <path class="circle" id="consistency-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      <text x="18" y="20.35" class="percentage" id="consistency-percent">0%</text>
+                    </svg>
+                  </div>
+                  <div class="progress-details">
+                    <h4>Cumulative Profile Refinement</h4>
+                    <p class="text-muted">The generator blends multiple uploaded styles to predict natural variations in pressure and connections.</p>
+                    <div class="status-badge" id="learning-status">Awaiting First Upload</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Preview Playground -->
+          <div class="card card-playground">
+            <div class="card-header">
+              <h3>Quick Style Playground</h3>
+              <p class="text-muted">Instantly verify how the active style profile translates standard typing into handwriting.</p>
+            </div>
+            <div class="playground-body">
+              <div class="input-section">
+                <textarea id="quick-input" placeholder="Type here to test handwriting generation (e.g., Hello handwriting!)..."></textarea>
+                <div class="input-actions">
+                  <button class="btn btn-primary" id="btn-quick-generate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Synthesize Style
+                  </button>
+                </div>
+              </div>
+              <div class="canvas-container">
+                <canvas id="quick-canvas" width="600" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 2: CAMERA & UPLOAD -->
+        <section id="panel-analyzer" class="content-panel">
+          <div class="layout-analyzer">
+            <!-- Left Side: Capture Panel -->
+            <div class="card capture-card">
+              <div class="card-header">
+                <h3>Input Capture Center</h3>
+                <p class="text-muted">Take a photo of your handwritten homework/text or upload an image file.</p>
+              </div>
+              
+              <!-- Tab Navigation for Camera vs Upload -->
+              <div class="capture-tabs">
+                <button class="tab-btn active" id="tab-camera">Use Web Camera</button>
+                <button class="tab-btn" id="tab-file">Upload Image File</button>
+              </div>
+
+              <!-- Camera Viewport Container -->
+              <div id="camera-viewport-container" class="viewport-box active">
+                <video id="camera-stream" autoplay playsinline></video>
+                <div class="camera-grid-overlay"></div>
+                <div class="viewport-placeholder" id="camera-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <p>Camera stream inactive.</p>
+                  <button class="btn btn-secondary btn-sm" id="btn-start-camera">Enable Camera Access</button>
+                </div>
+                <button class="btn-capture" id="btn-capture-snapshot" disabled>
+                  <div class="inner-circle"></div>
+                </button>
+              </div>
+
+              <!-- File Upload Viewport Container -->
+              <div id="file-viewport-container" class="viewport-box">
+                <div class="drag-drop-zone" id="drag-zone">
+                  <svg class="zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                  </svg>
+                  <p class="zone-text">Drag and drop your handwriting photo here</p>
+                  <span class="zone-or">or</span>
+                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                  <input type="file" id="file-input" accept="image/*" style="display:none">
+                </div>
+              </div>
+
+              <!-- File Info Bar -->
+              <div class="file-info-bar" id="file-info-panel" style="display:none">
+                <span class="file-name" id="selected-file-name">filename.jpg</span>
+                <button class="btn btn-primary btn-sm" id="btn-submit-upload">Process Photo</button>
+              </div>
+            </div>
+
+            <!-- Right Side: Live Logs & Feature Extraction -->
+            <div class="card logs-card">
+              <div class="card-header">
+                <h3>Real-Time Extraction Status</h3>
+                <p class="text-muted">Observe calculations run by ScribeAI neural heuristics models.</p>
+              </div>
+              <div class="card-body log-container">
+                <div class="analyzer-image-preview">
+                  <canvas id="analysis-preview-canvas"></canvas>
+                  <div class="analysis-scan-line"></div>
+                </div>
+                
+                <div class="console-box" id="analysis-logs">
+                  <div class="log-line system">[System] Ready to accept handwriting samples.</div>
+                </div>
+
+                <!-- Extracted Raw Statistics Table -->
+                <div class="raw-stats-box" style="display: none;" id="analysis-stats-card">
+                  <h4>Extracted Attributes (Recent Sample)</h4>
+                  <div class="stat-row">
+                    <span>Ink Stroke Angle:</span>
+                    <strong id="stat-slant">--</strong>
+                  </div>
+                  <div class="stat-row">
+                    <span>Calculated Thickness:</span>
+                    <strong id="stat-width">--</strong>
+                  </div>
+                  <div class="stat-row">
+                    <span>Median Letter Gap:</span>
+                    <strong id="stat-spacing">--</strong>
+                  </div>
+                  <div class="stat-row">
+                    <span>Geometric Jitter:</span>
+                    <strong id="stat-jitter">--</strong>
+                  </div>
+                  <div class="stat-row">
+                    <span>Connection Flow Rate:</span>
+                    <strong id="stat-cursive">--</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 3: SYNTHESIS & PRACTICE LABS -->
+        <section id="panel-generator" class="content-panel">
+          <div class="layout-generator">
+            <!-- Left Controls & Templates -->
+            <div class="card controls-card">
+              <!-- Practice Tabs -->
+              <div class="practice-tabs">
+                <button class="pract-tab active" data-subject="general">Custom Content</button>
+                <button class="pract-tab" data-subject="science">Science Lab</button>
+                <button class="pract-tab" data-subject="maths">Maths Lab</button>
+                <button class="pract-tab" data-subject="social">Social Studies</button>
+                <button class="pract-tab" data-subject="french">French Practicum</button>
+              </div>
+
+              <div class="card-body generator-settings">
+                <!-- Text Inputs based on current subject -->
+                <div class="subject-panel active" id="subject-general">
+                  <label for="gen-text-input">Synthesizer Text Input</label>
+                  <textarea id="gen-text-input" placeholder="Type custom content here. Check the other tabs for subject-specific templates.">Practice makes perfect handwriting. Let's write cursive strokes.</textarea>
+                </div>
+
+                <div class="subject-panel" id="subject-science">
+                  <div class="subject-header">
+                    <h4>Science Formula Lab</h4>
+                    <p class="text-muted-sm">Practice long biochemical compound names, elements, subscripts, and equations.</p>
+                  </div>
+                  <div class="template-chips">
+                    <button class="chip" data-text="Carbon (Atomic No: 6) - organic life form. H2O + CO2 -> H2CO3">Carbonic Reaction</button>
+                    <button class="chip" data-text="Photosynthesis: 6CO2 + 6H2O -> C6H12O6 + 6O2">Photosynthesis</button>
+                    <button class="chip" data-text="Deoxyribonucleic Acid structure uses Adenine, Thymine, Cytosine, Guanine.">DNA Molecules</button>
+                  </div>
+                  <textarea id="sci-text-input" placeholder="Science formula details..."></textarea>
+                </div>
+
+                <div class="subject-panel" id="subject-maths">
+                  <div class="subject-header">
+                    <h4>Maths Equation Lab</h4>
+                    <p class="text-muted-sm">Practice equations, fractions, square roots, integrals, and matrices.</p>
+                  </div>
+                  <div class="template-chips">
+                    <button class="chip" data-text="y = ax^2 + bx + c. Quadratic formula: x = [-b +- sqrt(b^2 - 4ac)] / 2a">Quadratic Equation</button>
+                    <button class="chip" data-text="Calculus: f'(x) = lim[h -> 0] (f(x+h) - f(x)) / h. Integral: S[a,b] x^2 dx = 1/3(b^3 - a^3)">Calculus & Limits</button>
+                    <button class="chip" data-text="Matrix operations: A = [1 2; 3 4], determinant |A| = 4 - 6 = -2">Matrices</button>
+                  </div>
+                  <textarea id="math-text-input" placeholder="Mathematical formulas..."></textarea>
+                </div>
+
+                <div class="subject-panel" id="subject-social">
+                  <div class="subject-header">
+                    <h4>Social Studies Timeline Lab</h4>
+                    <p class="text-muted-sm">Practice chronological timelines, historical names, and dates.</p>
+                  </div>
+                  <div class="template-chips">
+                    <button class="chip" data-text="July 14, 1789: The Storming of the Bastille. 1792: Proclamation of the First French Republic.">French Revolution</button>
+                    <button class="chip" data-text="October 24, 1945: United Nations Charter ratified. 1948: Universal Declaration of Human Rights.">United Nations</button>
+                    <button class="chip" data-text="1776: Declaration of Independence signed. 1787: Constitution drafted in Philadelphia.">American Foundation</button>
+                  </div>
+                  <textarea id="soc-text-input" placeholder="Historical timelines..."></textarea>
+                </div>
+
+                <div class="subject-panel" id="subject-french">
+                  <div class="subject-header">
+                    <h4>French Accents & Ligatures</h4>
+                    <p class="text-muted-sm">Practice French sentence styling, checking ligature connections and accents (é, è, ç, à, û, etc.).</p>
+                  </div>
+                  <div class="template-chips">
+                    <button class="chip" data-text="Éléonore a fêté son Noël à Genève avec son grand-père, très fâché.">Sentences with Accents</button>
+                    <button class="chip" data-text="Le garçon mange du gâteau près de la forêt où il a aperçu un grand chêne.">Cedilla & Circumflex</button>
+                    <button class="chip" data-text="Où est passée la clé? C'est l'étudiant qui l'a égarée à l'école de musique.">Questions & Apostrophes</button>
+                  </div>
+                  <textarea id="fre-text-input" placeholder="French content..."></textarea>
+                </div>
+
+                <!-- Live Parameter Tuning -->
+                <div class="tuning-section">
+                  <h4>Style Tuning Parameters</h4>
+                  <div class="control-group">
+                    <div class="control-header">
+                      <label for="tune-slant">Slant Angle (Degrees)</label>
+                      <span id="val-slant">5°</span>
+                    </div>
+                    <input type="range" id="tune-slant" min="-25" max="25" step="1" value="5">
+                  </div>
+
+                  <div class="control-group">
+                    <div class="control-header">
+                      <label for="tune-width">Stroke Thickness (px)</label>
+                      <span id="val-width">2.5px</span>
+                    </div>
+                    <input type="range" id="tune-width" min="1.0" max="6.0" step="0.1" value="2.5">
+                  </div>
+
+                  <div class="control-group">
+                    <div class="control-header">
+                      <label for="tune-spacing">Character Spacing</label>
+                      <span id="val-spacing">3</span>
+                    </div>
+                    <input type="range" id="tune-spacing" min="0.5" max="10" step="0.5" value="3">
+                  </div>
+
+                  <div class="control-group">
+                    <div class="control-header">
+                      <label for="tune-jitter">Stroke Jitter / Wiggle</label>
+                      <span id="val-jitter">1px</span>
+                    </div>
+                    <input type="range" id="tune-jitter" min="0" max="4" step="0.1" value="1">
+                  </div>
+
+                  <div class="control-group">
+                    <div class="control-header">
+                      <label for="tune-cursive">Cursive Connection Ratio</label>
+                      <span id="val-cursive">0.40</span>
+                    </div>
+                    <input type="range" id="tune-cursive" min="0.0" max="1.0" step="0.05" value="0.40">
+                  </div>
+
+                  <div class="control-group">
+                    <div class="control-header">
+                      <label for="tune-size">Synthesis Size (Scale)</label>
+                      <span id="val-size">1.0</span>
+                    </div>
+                    <input type="range" id="tune-size" min="0.6" max="2.0" step="0.1" value="1.0">
+                  </div>
+                  
+                  <div class="control-group">
+                    <label for="tune-color">Ink Color</label>
+                    <select id="tune-color">
+                      <option value="#1c2d5a">Classic Navy Ink</option>
+                      <option value="#0d0d0d">Charcoal Black</option>
+                      <option value="#1d5f3a">School Green</option>
+                      <option value="#8b2626">Grading Red</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="action-buttons">
+                  <button class="btn btn-primary btn-block" id="btn-synthesis-generate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Synthesize Handwriting
+                  </button>
+                  <button class="btn btn-secondary btn-block" id="btn-reset-tuning">Reset to Current Profile</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Canvas Viewer -->
+            <div class="card viewer-card">
+              <div class="card-header">
+                <h3>Generated Cursive Sheet</h3>
+                <div class="sheet-actions">
+                  <button class="btn-icon" id="btn-download-sheet" title="Download Image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                  </button>
+                  <button class="btn-icon" id="btn-clear-sheet" title="Clear Canvas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="canvas-viewer-body">
+                <div class="paper-lines-container">
+                  <canvas id="synthesis-canvas" width="800" height="600"></canvas>
+                </div>
+              </div>
+              <div class="canvas-footer">
+                <p class="text-muted-sm">The sheet runs standard high-resolution rendering. Standard grid lines model notebook paper grids.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 4: CHAT ASSISTANT -->
+        <section id="panel-chat" class="content-panel">
+          <div class="card chat-card">
+            <div class="chat-header">
+              <div class="coach-avatar">AI</div>
+              <div class="coach-info">
+                <h3>Handwriting Assistant Coach</h3>
+                <span class="active-status">Always Online - Analyzing Profile</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-clear-chats">Clear Chats</button>
+            </div>
+            
+            <div class="chat-messages-container" id="chat-messages">
+              <!-- Message entries populated dynamically -->
+              <div class="message assistant">
+                <p class="text">Hello! I am your ScribeAI Penmanship Coach. Upload your handwriting in the camera portal, and I will track your progress. I can give advice on slant, strokes, or set exercises for Math, Science, or French. How can I help you today?</p>
+                <span class="time">Just now</span>
+              </div>
+            </div>
+
+            <div class="chat-shortcuts">
+              <span>Quick Prompts:</span>
+              <button class="shortcut-chip" data-prompt="How does my current slant compare to past readings?">Analyze slant trend</button>
+              <button class="shortcut-chip" data-prompt="What handwriting exercises can I do to reduce stroke jitter?">Tips to reduce jitter</button>
+              <button class="shortcut-chip" data-prompt="Give me a French accent handwriting test sentence.">French test sentence</button>
+            </div>
+
+            <div class="chat-input-bar">
+              <input type="text" id="chat-user-input" placeholder="Ask your AI coach about your progress, handwriting styles, or subjects...">
+              <button class="btn btn-primary" id="btn-send-message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Send
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 5: HISTORY & TRENDS -->
+        <section id="panel-history" class="content-panel">
+          <div class="layout-history">
+            <!-- Left Side: Analytics Charts -->
+            <div class="card charts-card">
+              <div class="card-header">
+                <h3>Analytical Progress Metrics</h3>
+                <p class="text-muted">Tracking stability, slant consistency, and geometric jitters from upload uploads.</p>
+              </div>
+              <div class="card-body">
+                <div class="chart-container">
+                  <h4>Angle Slant Progression (° over Sessions)</h4>
+                  <canvas id="chart-slant" width="500" height="200"></canvas>
+                </div>
+                <div class="chart-container">
+                  <h4>Jitter Scale vs. Cursive Connection</h4>
+                  <canvas id="chart-jitter" width="500" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Upload History Grid -->
+            <div class="card gallery-card">
+              <div class="card-header">
+                <h3>Calibration Log</h3>
+                <p class="text-muted">Review image samples and extracted metadata from previous sessions.</p>
+              </div>
+              <div class="gallery-container" id="history-gallery">
+                <!-- Historic photos listed here -->
+                <div class="empty-gallery" id="empty-history-notice">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <p>No historical handwriting samples found. Submit your first analysis in the camera tab!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Authentication Overlay -->
+  <div id="auth-overlay" class="auth-overlay active">
+    <div class="auth-card">
+      <div class="auth-header">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        <h2>HandScribe AI</h2>
+        <p>Adaptive Penmanship & Subject Lab</p>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="btn-tab-login">Log In</button>
+        <button class="auth-tab-btn" id="btn-tab-signup">Sign Up</button>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form active">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" required placeholder="name@school.edu">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Access Account</button>
+      </form>
+      
+      <!-- Signup Form -->
+      <form id="signup-form" class="auth-form">
+        <div class="form-group">
+          <label for="signup-name">Student Full Name</label>
+          <input type="text" id="signup-name" required placeholder="Alex Mercer">
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" required placeholder="name@school.edu">
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" required placeholder="Create password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create Student Account</button>
+      </form>
+      
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+      
+      <button class="btn btn-secondary btn-block" id="btn-auth-guest">Continue as Guest (No Account)</button>
+      
+      <div class="auth-error-msg" id="auth-error" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Client Script -->
+  <script src="client.js"></script>
+</body>
+</html>

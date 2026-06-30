@@ -1,0 +1,32 @@
+{
+  "chats": [
+    {
+      "id": "1782828100022-user",
+      "sender": "user",
+      "text": "hello",
+      "timestamp": "2026-06-30T14:01:40.022Z"
+    },
+    {
+      "id": "1782828100023-ai",
+      "sender": "ai",
+      "text": "Hello! I am your AI Handwriting Stylist and Coach. I study your uploaded samples and help you practice subjects. Looking at your current profile, you have analyzed 0 samples. Your average slant is 5° and stroke jitter is 1px. How can I assist you with handwriting practice today?",
+      "timestamp": "2026-06-30T14:01:40.022Z"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "default",
+      "name": "Default Student Profile",
+      "sessions": 0,
+      "slant": 5,
+      "strokeWidth": 2.5,
+      "letterSpacing": 3,
+      "jitter": 1,
+      "wordSpacing": 8,
+      "ascenderHeight": 1.1,
+      "descenderHeight": 1.1,
+      "connectionRatio": 0.4,
+      "history": []
+    }
+  ]
+}
