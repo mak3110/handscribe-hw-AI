@@ -11,22 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ensure directories exist
-const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
-
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'handwriting-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Multer setup for memory storage (Vercel serverless-friendly)
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
   storage: storage,
@@ -34,9 +20,14 @@ const upload = multer({
 });
 
 const DB_PATH = path.join(__dirname, 'database.json');
+let memoryDb = { chats: [], profiles: [], users: [] };
+let useMemoryDb = false;
 
 // Helper to read database
 function readDatabase() {
+  if (useMemoryDb) {
+    return memoryDb;
+  }
   try {
     if (!fs.existsSync(DB_PATH)) {
       return { chats: [], profiles: [], users: [] };
@@ -48,17 +39,24 @@ function readDatabase() {
     if (!db.chats) db.chats = [];
     return db;
   } catch (error) {
-    console.error('Error reading database:', error);
-    return { chats: [], profiles: [], users: [] };
+    console.warn('Read database failed, falling back to memory:', error.message);
+    useMemoryDb = true;
+    return memoryDb;
   }
 }
 
 // Helper to write database
 function writeDatabase(data) {
+  if (useMemoryDb) {
+    memoryDb = data;
+    return;
+  }
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
   } catch (error) {
-    console.error('Error writing database:', error);
+    console.warn('Write database failed, switching to memory storage:', error.message);
+    useMemoryDb = true;
+    memoryDb = data;
   }
 }
 
@@ -150,7 +148,7 @@ app.post('/api/analyze', upload.single('photo'), (req, res) => {
 
   const email = (req.body.email || 'default').toLowerCase();
   const fileSize = req.file.size;
-  const fileName = req.file.filename;
+  const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
   
   // Create deterministic features based on file characteristics
   const rawSlant = -15 + ((fileSize % 300) / 10);
@@ -183,7 +181,7 @@ app.post('/api/analyze', upload.single('photo'), (req, res) => {
 
   const newRecord = {
     timestamp: new Date().toISOString(),
-    image: `/uploads/${fileName}`,
+    image: base64Image,
     slant: profile.slant,
     strokeWidth: profile.strokeWidth,
     letterSpacing: profile.letterSpacing,
